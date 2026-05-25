@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle2, Presentation } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 
 const steps = [
-  "Open the analyzer workbench.",
-  "Load the bad function usage template.",
-  "Click Analyze to run the full pipeline.",
-  "Show health score, critical issues, and explain plan flow.",
-  "Show Groq AI explanation and the optimized SQL.",
-  "Apply the optimized query to the editor.",
-  "Highlight benchmark charts and index recommendations.",
-  "Close with measurable faster query performance.",
+  "Open the analyzer workbench",
+  "Load the function usage template",
+  "Click Analyze",
+  "Show health score and critical issues",
+  "Walk through the AI explanation",
+  "Apply the optimized query",
+  "Show benchmark charts and index recommendations",
+  "Close with measurable improvement",
 ];
 
 export default function DemoGuidePage() {
@@ -19,11 +19,7 @@ export default function DemoGuidePage() {
   function toggleStep(index) {
     setCompleted((prev) => {
       const next = new Set(prev);
-      if (next.has(index)) {
-        next.delete(index);
-      } else {
-        next.add(index);
-      }
+      next.has(index) ? next.delete(index) : next.add(index);
       return next;
     });
   }
@@ -31,58 +27,30 @@ export default function DemoGuidePage() {
   return (
     <main className="page-stack narrow-page">
       <section className="guide-hero">
-        <p className="eyebrow">
-          <Presentation size={11} />
-          Presentation Flow
-        </p>
-        <h1>Final Demo Script</h1>
+        <p className="label">Demo Script</p>
+        <h1>Judging Walkthrough</h1>
         <p>
-          Use this checklist during judging to keep the walkthrough sharp and
-          reliable. Click each step to mark it complete.
+          Click each step to track progress during the live demo.
         </p>
-        <Link className="primary-link" to="/analyze">
-          Start Live Demo
-          <ArrowRight size={16} />
+        <Link className="btn-primary" to="/analyze">
+          Start Demo <ArrowRight size={15} />
         </Link>
       </section>
 
       <section className="timeline-panel">
-        {steps.map((step, index) => (
+        {steps.map((step, i) => (
           <div
             className="timeline-row"
             key={step}
-            onClick={() => toggleStep(index)}
+            onClick={() => toggleStep(i)}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") toggleStep(index);
-            }}
-            style={{ cursor: "pointer" }}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") toggleStep(i); }}
           >
-            <span
-              style={
-                completed.has(index)
-                  ? {
-                      background: "var(--success)",
-                      color: "#fff",
-                      boxShadow: "0 4px 12px rgba(16, 185, 129, 0.25)",
-                    }
-                  : undefined
-              }
-            >
-              {completed.has(index) ? (
-                <CheckCircle2 size={16} />
-              ) : (
-                index + 1
-              )}
+            <span className={`step-num ${completed.has(i) ? "step-done" : ""}`}>
+              {completed.has(i) ? <Check size={14} /> : i + 1}
             </span>
-            <p
-              style={
-                completed.has(index)
-                  ? { textDecoration: "line-through", opacity: 0.5 }
-                  : undefined
-              }
-            >
+            <p className={completed.has(i) ? "step-text-done" : ""}>
               {step}
             </p>
           </div>

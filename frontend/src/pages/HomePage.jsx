@@ -1,31 +1,27 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { BarChart3, BrainCircuit, Gauge, Wand2, ArrowRight, Zap } from "lucide-react";
+import { BarChart3, BrainCircuit, Gauge, Wand2, ArrowRight } from "lucide-react";
 
-const highlights = [
+const features = [
   {
     icon: BrainCircuit,
-    title: "Groq AI Insights",
-    text: "Explain slow queries in plain language so teams understand the bottleneck immediately.",
-    color: "indigo",
+    title: "AI Query Explanation",
+    text: "Groq translates slow queries into plain-language bottleneck analysis.",
   },
   {
     icon: Wand2,
-    title: "SQL Rewrites",
-    text: "Generate index-friendly SQL and remove common anti-patterns like SELECT * and column functions.",
-    color: "violet",
+    title: "Automatic SQL Rewrite",
+    text: "Generates index-friendly SQL, removes SELECT * and column functions.",
   },
   {
     icon: BarChart3,
-    title: "Benchmarks",
-    text: "Show before/after runtime so the optimization story is measurable, not just theoretical.",
-    color: "amber",
+    title: "Runtime Benchmarks",
+    text: "Before/after execution timing proves optimization impact with data.",
   },
   {
     icon: Gauge,
-    title: "Health Score",
-    text: "Turn query quality into a judge-friendly score with issues, confidence, and recommendations.",
-    color: "emerald",
+    title: "Health Scoring",
+    text: "Scores query quality from 0–100 based on plan analysis and rules.",
   },
 ];
 
@@ -34,62 +30,47 @@ export default function HomePage() {
     <main className="page-stack">
       <section className="landing-hero">
         <div>
-          <p className="eyebrow">
-            <Zap size={11} />
-            Smarter Queries. Faster Databases.
-          </p>
-          <h1>
-            Optimize SQL{" "}
-            <span className="gradient-text">Instantly</span>
-            {" "}with AI
-          </h1>
-          <p>
-            Detect bottlenecks, rewrite inefficient queries, recommend indexes,
-            and prove performance improvement — all in one clean workflow.
+          <span className="hero-label">SQL Optimization Tool</span>
+          <h1>Find slow queries. Fix them fast.</h1>
+          <p className="hero-desc">
+            Paste a query, get an execution plan analysis, AI explanation,
+            optimized rewrite, index recommendations, and benchmark comparison.
           </p>
           <div className="hero-actions">
-            <Link className="primary-link" to="/analyze">
-              Analyze a Query
-              <ArrowRight size={16} />
+            <Link className="btn-primary" to="/analyze">
+              Open Analyzer
+              <ArrowRight size={15} />
             </Link>
-            <Link className="secondary-link" to="/demo">View Demo Flow</Link>
-          </div>
-          <div className="hero-stats">
-            <div className="hero-stat">
-              <strong>100K+</strong>
-              <span>Orders in demo DB</span>
-            </div>
-            <div className="hero-stat">
-              <strong>&lt;2s</strong>
-              <span>Analysis time</span>
-            </div>
-            <div className="hero-stat">
-              <strong>6</strong>
-              <span>Optimization rules</span>
-            </div>
+            <Link className="btn-ghost" to="/demo">Demo Script</Link>
           </div>
         </div>
-        <div className="hero-proof">
-          <span>Demo impact</span>
-          <strong>AI + Explain Plan + Benchmarks</strong>
-          <p>
-            Built for a fast live walkthrough: slow query → bottleneck
-            explanation → rewrite → index recommendation → measurable improvement.
-          </p>
+
+        <div className="hero-visual">
+          <span className="hero-visual-label">Before → After</span>
+          <pre>{`-- Slow: full scan + function
+SELECT *
+FROM orders
+WHERE LOWER(customer_name) = 'john';
+
+-- Fast: direct lookup
+SELECT id, customer_name, amount
+FROM orders
+WHERE customer_name = 'John';`}</pre>
+          <p className="hero-visual-caption">Real optimization from OptiQuery</p>
         </div>
       </section>
 
-      <section className="feature-grid">
-        {highlights.map((item) => {
+      <section className="features-section">
+        {features.map((item) => {
           const Icon = item.icon;
           return (
-            <article className="feature-card" key={item.title}>
-              <div className={`feature-icon ${item.color}`}>
-                <Icon size={20} />
+            <div className="feature-item" key={item.title}>
+              <Icon size={18} />
+              <div>
+                <h3>{item.title}</h3>
+                <p>{item.text}</p>
               </div>
-              <h2>{item.title}</h2>
-              <p>{item.text}</p>
-            </article>
+            </div>
           );
         })}
       </section>

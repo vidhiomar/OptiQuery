@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from "react";
-import { Play, Wand2, Keyboard } from "lucide-react";
+import { Play, Wand2 } from "lucide-react";
 
 import BenchmarkChart from "../components/BenchmarkChart.jsx";
 import ExplainPlan from "../components/ExplainPlan.jsx";
@@ -13,18 +13,9 @@ import { useQueryAnalysis } from "../hooks/useQueryAnalysis.js";
 
 export default function AnalyzerPage() {
   const {
-    analyze,
-    canOptimize,
-    error,
-    isCurrentQueryAnalyzed,
-    isCurrentQueryOptimized,
-    loading,
-    optimizeCurrentResult,
-    query,
-    result,
-    runDemo,
-    setQuery,
-    useOptimizedQuery,
+    analyze, canOptimize, error, isCurrentQueryAnalyzed,
+    isCurrentQueryOptimized, loading, optimizeCurrentResult,
+    query, result, runDemo, setQuery, useOptimizedQuery,
   } = useQueryAnalysis();
 
   const handleKeyDown = useCallback(
@@ -45,18 +36,18 @@ export default function AnalyzerPage() {
   return (
     <main className="analyzer-page">
       <LoadingOverlay visible={loading} />
+
       <section className="analyzer-hero">
         <div>
-          <p className="eyebrow">
-            <Keyboard size={11} />
-            Query Analyzer
+          <p className="label">Analyzer</p>
+          <h1>Diagnose &amp; optimize SQL</h1>
+          <p className="sub">
+            Load a query, analyze the plan, apply the rewrite.
           </p>
-          <h1>Diagnose, rewrite, and benchmark SQL in one flow.</h1>
-          <p>Load a slow query, analyze the plan, then apply the optimized rewrite.</p>
         </div>
         <button onClick={runDemo} className="demo-button" type="button">
-          <Play size={16} />
-          Run Demo Mode
+          <Play size={15} />
+          Demo Mode
         </button>
       </section>
 
@@ -64,7 +55,7 @@ export default function AnalyzerPage() {
         <div className="editor-pane">
           <header className="app-header">
             <div>
-              <p className="eyebrow">Workbench</p>
+              <p className="section-label">Workbench</p>
               <h2>SQL Input</h2>
             </div>
             <div className="button-group">
@@ -73,16 +64,16 @@ export default function AnalyzerPage() {
                 disabled={loading || isCurrentQueryAnalyzed}
                 className={isCurrentQueryAnalyzed ? "state-button" : "primary-button"}
               >
-                <Play size={15} />
-                {loading ? "Analyzing..." : isCurrentQueryAnalyzed ? "Already analyzed" : "Analyze"}
+                <Play size={14} />
+                {loading ? "Running..." : isCurrentQueryAnalyzed ? "Analyzed" : "Analyze"}
               </button>
               <button
                 onClick={optimizeCurrentResult}
                 disabled={loading || !canOptimize}
                 className={isCurrentQueryOptimized ? "state-button" : "secondary-button"}
               >
-                <Wand2 size={15} />
-                {isCurrentQueryOptimized ? "Already optimized" : canOptimize ? "Optimize" : "Analyze first"}
+                <Wand2 size={14} />
+                {isCurrentQueryOptimized ? "Applied" : canOptimize ? "Optimize" : "Analyze first"}
               </button>
             </div>
           </header>

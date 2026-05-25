@@ -1,21 +1,18 @@
 import React, { useState } from "react";
-import { CheckCircle2, Clipboard, Check, Sparkles, Wand2, AlertTriangle, ListChecks, Database, Table2 } from "lucide-react";
+import { Clipboard, Check, Wand2, CheckCircle2, AlertTriangle, Database, Table2 } from "lucide-react";
 
 function getSeverity(item, title) {
-  const text = item.toLowerCase();
-  if (title.includes("Issues") && (text.includes("scan") || text.includes("missing where"))) return "Critical";
-  if (title.includes("Issues")) return "Warning";
+  const t = item.toLowerCase();
+  if (title === "Issues" && (t.includes("scan") || t.includes("missing where"))) return "Critical";
+  if (title === "Issues") return "Warning";
   return "Recommended";
 }
 
-function ListBlock({ title, items, emptyText, icon: Icon }) {
+function ListBlock({ title, items, emptyText }) {
   return (
     <section className="result-block">
       <div className="block-heading">
-        <div className="block-title">
-          {Icon && <Icon size={16} />}
-          <h2>{title}</h2>
-        </div>
+        <h2>{title}</h2>
         {items.length > 0 && <span>{items.length}</span>}
       </div>
       {items.length ? (
@@ -39,12 +36,11 @@ function ListBlock({ title, items, emptyText, icon: Icon }) {
 function AiExplanation({ result }) {
   return (
     <section className="result-block">
-      <div className="block-title">
-        <Sparkles size={16} />
+      <div className="block-heading">
         <h2>AI Explanation</h2>
       </div>
-      <div className="chat-bubble">
-        {result?.ai_explanation || "Run an analysis to generate AI optimization insight."}
+      <div className="ai-response">
+        {result?.ai_explanation || "Run an analysis to see AI insights."}
       </div>
     </section>
   );
@@ -53,27 +49,24 @@ function AiExplanation({ result }) {
 function OptimizedQuery({ result, onUseOptimizedQuery }) {
   const [copied, setCopied] = useState(false);
 
-  async function copyQuery() {
-    if (result?.optimized_query) {
-      await navigator.clipboard.writeText(result.optimized_query);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    }
+  async function copy() {
+    if (!result?.optimized_query) return;
+    await navigator.clipboard.writeText(result.optimized_query);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
   }
 
   return (
     <section className="result-block">
       <div className="block-header">
-        <div className="block-title">
-          <Wand2 size={16} />
-          <h2>Optimized SQL</h2>
-        </div>
+        <h2>Optimized SQL</h2>
         <div className="button-group">
-          <button className="icon-button" disabled={!result?.optimized_query} onClick={copyQuery} title={copied ? "Copied!" : "Copy"} type="button">
-            {copied ? <Check size={16} /> : <Clipboard size={16} />}
+          <button className="icon-button" disabled={!result?.optimized_query} onClick={copy} title="Copy" type="button">
+            {copied ? <Check size={14} /> : <Clipboard size={14} />}
           </button>
-          <button className="secondary-button" disabled={!result?.optimized_query} onClick={() => onUseOptimizedQuery(result.optimized_query)} type="button">
-            Use Optimized SQL
+          <button className="secondary-button" disabled={!result?.optimized_query}
+            onClick={() => onUseOptimizedQuery(result.optimized_query)} type="button">
+            Use this query
           </button>
         </div>
       </div>
@@ -82,50 +75,42 @@ function OptimizedQuery({ result, onUseOptimizedQuery }) {
       ) : (
         <div className="empty-state">Run an analysis to generate optimized SQL.</div>
       )}
-      {copied && <p className="copy-feedback">✓ Copied to clipboard</p>}
+      {copied && <p className="copy-feedback">Copied</p>}
     </section>
   );
 }
 
-function SummaryPanel({ result }) {
-  const improved = result?.improvement_percent != null && result.improvement_percent > 0;
+function Summary({ result }) {
+  const improved = result?.improvement_percent > 0;
   return (
     <section className="result-block">
-      <div className="block-title">
-        <CheckCircle2 size={16} />
-        <h2>Optimization Summary</h2>
-      </div>
+      <div className="block-heading"><h2>Summary</h2></div>
       {result ? (
         <ul className="summary-list">
           <li>Optimized SQL generated</li>
-          <li>{result.index_recommendations?.length ? "Index recommendation generated" : "No index needed by current rules"}</li>
-          <li>{improved ? `Runtime improved by ${result.improvement_percent}%` : "Benchmark comparison completed"}</li>
+          <li>{result.index_recommendations?.length ? "Index recommended" : "No index needed"}</li>
+          <li>{improved ? `${result.improvement_percent}% faster` : "Benchmark completed"}</li>
         </ul>
       ) : (
-        <div className="empty-state">Run an analysis to generate the demo summary.</div>
+        <div className="empty-state">Run an analysis to see summary.</div>
       )}
     </section>
   );
 }
 
 function PreviewTable({ result }) {
-  if (!result?.rows?.length) return <div className="empty-state">Run a query to preview rows.</div>;
+  if (!result?.rows?.length) return <div className="empty-state">No rows to display.</div>;
   return (
-    <>
-      <div className="table-wrap">
-        <table>
-          <thead>
-            <tr>{result.columns.map((col) => <th key={col}>{col}</th>)}</tr>
-          </thead>
-          <tbody>
-            {result.rows.slice(0, 10).map((row, i) => (
-              <tr key={i}>{result.columns.map((col) => <td key={col}>{String(row[col])}</td>)}</tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {result.truncated && <p className="muted" style={{ marginTop: 10, textAlign: "center" }}>Showing first 10 of 100 rows.</p>}
-    </>
+    <div className="table-wrap">
+      <table>
+        <thead><tr>{result.columns.map(c => <th key={c}>{c}</th>)}</tr></thead>
+        <tbody>
+          {result.rows.slice(0, 10).map((row, i) => (
+            <tr key={i}>{result.columns.map(c => <td key={c}>{String(row[c])}</td>)}</tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -134,13 +119,16 @@ export default function ResultPanel({ result, onUseOptimizedQuery }) {
     <div className="panel-stack">
       <AiExplanation result={result} />
       <OptimizedQuery result={result} onUseOptimizedQuery={onUseOptimizedQuery} />
-      <SummaryPanel result={result} />
-      <ListBlock title="Issues" icon={AlertTriangle} items={result?.issues || []} emptyText={result ? "No bottlenecks detected." : "Run an analysis to see issues."} />
-      <ListBlock title="Suggestions" icon={ListChecks} items={result?.suggestions || []} emptyText={result ? "No suggestions needed." : "Run an analysis to see suggestions."} />
-      <ListBlock title="Index Recommendations" icon={Database} items={result?.index_recommendations || []} emptyText={result ? "No index recommendations." : "Run an analysis to see recommendations."} />
+      <Summary result={result} />
+      <ListBlock title="Issues" items={result?.issues || []}
+        emptyText={result ? "No issues found." : "Run an analysis."} />
+      <ListBlock title="Suggestions" items={result?.suggestions || []}
+        emptyText={result ? "No suggestions." : "Run an analysis."} />
+      <ListBlock title="Index Recommendations" items={result?.index_recommendations || []}
+        emptyText={result ? "No indexes needed." : "Run an analysis."} />
       <section className="result-block">
         <div className="block-heading">
-          <div className="block-title"><Table2 size={16} /><h2>Query Results</h2></div>
+          <h2>Query Results</h2>
           {result?.row_count != null && <span>{result.row_count} rows</span>}
         </div>
         <PreviewTable result={result} />

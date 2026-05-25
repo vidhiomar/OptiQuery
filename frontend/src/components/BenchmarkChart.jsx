@@ -1,96 +1,83 @@
 import React from "react";
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
+  Bar, BarChart, CartesianGrid, Line, LineChart,
+  ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
 
-const COLORS = {
-  primary: "#6366f1",
-  success: "#10b981",
-  grid: "#e5e7eb",
-  axis: "#9ca3af",
+const C = {
+  green: "#059669",
+  orange: "#ea580c",
+  grid: "#e7e5e4",
+  axis: "#a8a29e",
+  bg: "#fafaf9",
   surface: "#ffffff",
-  ink: "#111827",
-  border: "#e5e7eb",
+  ink: "#1c1917",
+  border: "#e7e5e4",
 };
 
-function formatSeconds(value) {
-  return `${value}s`;
-}
-
-const tooltipStyle = {
-  background: COLORS.surface,
-  border: `1px solid ${COLORS.border}`,
-  borderRadius: "8px",
-  color: COLORS.ink,
-  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-  fontSize: "0.85rem",
+const tip = {
+  background: C.surface,
+  border: `1px solid ${C.border}`,
+  borderRadius: "6px",
+  color: C.ink,
+  boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+  fontSize: "0.82rem",
 };
 
 export default function BenchmarkChart({ result }) {
   const before = result?.before_time ?? 0;
   const after = result?.after_time ?? 0;
 
-  const chartData = [
+  const barData = [
     { name: "Before", runtime: before },
     { name: "After", runtime: after },
   ];
-
-  const trendData = [
+  const lineData = [
     { step: "Original", runtime: before },
-    { step: "Rewrite", runtime: after || before },
+    { step: "Optimized", runtime: after || before },
   ];
 
   return (
     <section className="result-block chart-panel">
       <div className="block-header">
         <div>
-          <p className="eyebrow">Benchmark</p>
-          <h2>Before vs After Performance</h2>
+          <p className="section-label">Benchmark</p>
+          <h2>Before vs After</h2>
         </div>
         {result?.improvement_percent != null && (
           <span className="improvement-badge">
-            {result.improvement_percent > 0
-              ? `${result.improvement_percent}% Faster`
-              : "Benchmark Compared"}
+            {result.improvement_percent > 0 ? `${result.improvement_percent}% faster` : "compared"}
           </span>
         )}
       </div>
-
       {result ? (
         <div className="chart-grid">
           <div className="chart-box">
-            <ResponsiveContainer width="100%" height={210}>
-              <BarChart data={chartData} barCategoryGap="35%">
-                <CartesianGrid stroke={COLORS.grid} strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" stroke={COLORS.axis} fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke={COLORS.axis} fontSize={12} tickFormatter={formatSeconds} tickLine={false} axisLine={false} />
-                <Tooltip contentStyle={tooltipStyle} formatter={(value) => [`${value}s`, "Runtime"]} cursor={{ fill: "rgba(99,102,241,0.05)" }} />
-                <Bar dataKey="runtime" fill={COLORS.primary} radius={[8, 8, 0, 0]} />
+            <ResponsiveContainer width="100%" height={190}>
+              <BarChart data={barData} barCategoryGap="40%">
+                <CartesianGrid stroke={C.grid} strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="name" stroke={C.axis} fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke={C.axis} fontSize={11} tickFormatter={v => `${v}s`} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={tip} formatter={v => [`${v}s`, "Runtime"]} cursor={{ fill: "rgba(5,150,105,0.04)" }} />
+                <Bar dataKey="runtime" fill={C.green} radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
           <div className="chart-box">
-            <ResponsiveContainer width="100%" height={210}>
-              <LineChart data={trendData}>
-                <CartesianGrid stroke={COLORS.grid} strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="step" stroke={COLORS.axis} fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke={COLORS.axis} fontSize={12} tickFormatter={formatSeconds} tickLine={false} axisLine={false} />
-                <Tooltip contentStyle={tooltipStyle} formatter={(value) => [`${value}s`, "Runtime"]} />
-                <Line type="monotone" dataKey="runtime" stroke={COLORS.success} strokeWidth={3} dot={{ r: 6, fill: COLORS.success, stroke: COLORS.surface, strokeWidth: 3 }} />
+            <ResponsiveContainer width="100%" height={190}>
+              <LineChart data={lineData}>
+                <CartesianGrid stroke={C.grid} strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="step" stroke={C.axis} fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke={C.axis} fontSize={11} tickFormatter={v => `${v}s`} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={tip} formatter={v => [`${v}s`, "Runtime"]} />
+                <Line type="monotone" dataKey="runtime" stroke={C.orange} strokeWidth={2.5}
+                  dot={{ r: 5, fill: C.orange, stroke: C.surface, strokeWidth: 2 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
       ) : (
-        <p className="muted">Analyze a query to render benchmark charts.</p>
+        <p className="muted">Analyze a query to see benchmarks.</p>
       )}
     </section>
   );
