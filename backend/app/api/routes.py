@@ -1,8 +1,15 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from app.services.ai_service import explain_query, optimize_query
+from app.services.benchmark_service import compare_queries
 from app.services.explain_service import get_query_plan, run_query_with_timing
-from app.services.optimization_service import calculate_health_score, suggest_optimizations
+from app.services.index_service import suggest_indexes
+from app.services.optimization_service import (
+    calculate_confidence,
+    calculate_health_score,
+    suggest_optimizations,
+)
 from app.services.parser_service import parse_sql
 from app.rules.query_rules import analyze_rules
 
@@ -25,7 +32,7 @@ def analyze_query(data: AnalyzeRequest):
         raise HTTPException(status_code=400, detail=parsed["error"])
 
     if parsed["statement_type"] != "SELECT":
-        raise HTTPException(status_code=400, detail="Sprint 1 supports SELECT queries only")
+        raise HTTPException(status_code=400, detail="OptiQuery supports SELECT queries only")
 
     try:
         plan = get_query_plan(query)
@@ -35,7 +42,20 @@ def analyze_query(data: AnalyzeRequest):
 
     issues = analyze_rules(query, plan)
     suggestions = suggest_optimizations(query, plan, issues)
+    index_recommendations = suggest_indexes(query)
+    optimized_query = optimize_query(query)
     health_score = calculate_health_score(query, plan, issues)
+    confidence = calculate_confidence(query, plan, issues)
+    ai_explanation = explain_query(query, plan, issues, index_recommendations)
+
+    try:
+        benchmark = compare_queries(query, optimized_query)
+    except Exception:
+        benchmark = {
+            "before_time": execution["execution_time"],
+            "after_time": None,
+            "improvement_percent": None,
+        }
 
     return {
         "query": query,
@@ -49,4 +69,11 @@ def analyze_query(data: AnalyzeRequest):
         "rows": execution["rows"],
         "truncated": execution["truncated"],
         "health_score": health_score,
+        "ai_explanation": ai_explanation,
+        "optimized_query": optimized_query,
+        "index_recommendations": index_recommendations,
+        "before_time": benchmark["before_time"],
+        "after_time": benchmark["after_time"],
+        "improvement_percent": benchmark["improvement_percent"],
+        "confidence": confidence,
     }

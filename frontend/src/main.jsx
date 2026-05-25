@@ -50,7 +50,7 @@ function App() {
         <div className="editor-pane">
           <header className="app-header">
             <div>
-              <p className="eyebrow">Sprint 1</p>
+              <p className="eyebrow">Sprint 2</p>
               <h1>OptiQuery SQL Optimizer</h1>
             </div>
             <button onClick={handleAnalyze} disabled={loading} className="primary-button">
@@ -73,7 +73,7 @@ function App() {
 
         <div className="result-pane">
           <MetricsCard result={result} />
-          <ResultPanel result={result} />
+          <ResultPanel result={result} onUseOptimizedQuery={setQuery} />
           <ExplainPlan plan={result?.plan || []} />
         </div>
       </section>

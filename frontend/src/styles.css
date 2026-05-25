@@ -71,6 +71,7 @@ h2 {
 }
 
 .primary-button,
+.secondary-button,
 .demo-row button {
   border: 1px solid #a9b7c3;
   border-radius: 6px;
@@ -91,6 +92,16 @@ h2 {
 .primary-button:disabled {
   cursor: wait;
   opacity: 0.72;
+}
+
+.secondary-button {
+  padding: 8px 10px;
+  font-weight: 700;
+}
+
+.secondary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .sql-editor {
@@ -139,7 +150,7 @@ textarea {
 
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 12px;
 }
@@ -176,6 +187,18 @@ textarea {
   margin-bottom: 12px;
 }
 
+.block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.block-header h2 {
+  margin-bottom: 0;
+}
+
 .result-block ul {
   margin: 0;
   padding-left: 18px;
@@ -188,6 +211,50 @@ textarea {
 .muted {
   margin-bottom: 0;
   color: #697782;
+}
+
+.insight-text {
+  margin-bottom: 0;
+  color: #2c3944;
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
+.sql-output {
+  overflow-x: auto;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #d8e0e7;
+  border-radius: 6px;
+  background: #f8fafb;
+  color: #111820;
+  font-family: "Cascadia Code", Consolas, monospace;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.benchmark-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.benchmark-grid div {
+  padding: 10px;
+  border: 1px solid #d8e0e7;
+  border-radius: 6px;
+  background: #f8fafb;
+}
+
+.benchmark-grid span {
+  display: block;
+  margin-bottom: 6px;
+  color: #62717d;
+  font-size: 0.8rem;
+}
+
+.benchmark-grid strong {
+  font-size: 1.08rem;
 }
 
 .plan-list {
@@ -249,5 +316,14 @@ th {
 
   .metrics-grid {
     grid-template-columns: 1fr;
+  }
+
+  .benchmark-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .block-header {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

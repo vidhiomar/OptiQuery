@@ -1,8 +1,8 @@
 # OptiQuery
 
-OptiQuery is a Sprint 1 SQL optimizer prototype. It accepts SQL queries, runs them against SQLite, analyzes `EXPLAIN QUERY PLAN`, detects basic bottlenecks, and returns optimization suggestions to a React frontend.
+OptiQuery is a Sprint 2 SQL optimizer prototype. It accepts SQL queries, runs them against SQLite, analyzes `EXPLAIN QUERY PLAN`, detects bottlenecks, generates optimized SQL, recommends indexes, benchmarks before/after runtime, and returns AI-powered optimization insights to a React frontend.
 
-## Sprint 1 Scope
+## Sprint Scope
 
 Built:
 
@@ -14,12 +14,18 @@ Built:
 - Rule-based bottleneck detection
 - Basic optimization suggestions
 - Health score
+- AI query explanation
+- Optimized SQL generation
+- Index recommendations
+- Before/after benchmark comparison
+- Optimization confidence score
 - Frontend result display
 
 Not included yet:
 
 - Authentication
-- AI query rewriting
+- Multi-agent systems
+- RAG pipelines
 - Advanced agents
 - Complex dashboards
 - Live monitoring
@@ -35,7 +41,10 @@ backend/
       seed_db.py
     rules/query_rules.py
     services/
+      ai_service.py
+      benchmark_service.py
       explain_service.py
+      index_service.py
       optimization_service.py
       parser_service.py
     main.py
@@ -55,6 +64,13 @@ cd backend
 python -m pip install -r requirements.txt
 python app/db/seed_db.py
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+AI calls are optional. Without an API key, OptiQuery uses a local fallback so the demo still works. To enable OpenAI-backed responses:
+
+```bash
+set OPENAI_API_KEY=your_api_key_here
+set OPENAI_MODEL=gpt-4.1-mini
 ```
 
 The API runs at:
@@ -79,9 +95,23 @@ Request body:
 
 ```json
 {
-  "query": "SELECT * FROM orders;"
+  "query": "SELECT * FROM orders WHERE LOWER(customer_name) = 'john';"
 }
 ```
+
+Response includes:
+
+- `ai_explanation`
+- `optimized_query`
+- `index_recommendations`
+- `before_time`
+- `after_time`
+- `improvement_percent`
+- `confidence`
+- `health_score`
+- `plan`
+- `issues`
+- `suggestions`
 
 ## Frontend Setup
 
@@ -129,6 +159,8 @@ ORDER BY amount;
 - Detects full table scans from SQLite query plans
 - Detects missing `WHERE` clauses
 - Detects functions applied to columns, such as `LOWER(customer_name)`
+- Recommends indexes for common filters and sorts
+- Rewrites simple demo queries into more index-friendly SQL
 
 ## License
 

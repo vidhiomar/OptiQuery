@@ -42,3 +42,25 @@ def calculate_health_score(query, plan, issues):
         score -= 10
 
     return max(score, 0)
+
+
+def calculate_confidence(query, plan, issues):
+    score = 95
+    plan_text = " ".join(item["detail"] for item in plan).upper()
+
+    if "Avoid using SELECT *" in issues:
+        score -= 10
+
+    if "SCAN" in plan_text:
+        score -= 20
+
+    if "Function on column detected" in issues:
+        score -= 10
+
+    if "Missing WHERE clause" in issues:
+        score -= 8
+
+    if "USE TEMP B-TREE" in plan_text:
+        score -= 7
+
+    return max(score, 0)
