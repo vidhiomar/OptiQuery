@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from app.db.db_connection import get_connection
 from app.services.ai_service import explain_query, optimize_query
 from app.services.benchmark_service import compare_queries
 from app.services.explain_service import get_query_plan, run_query_with_timing
@@ -18,6 +19,10 @@ router = APIRouter()
 
 class AnalyzeRequest(BaseModel):
     query: str
+
+
+class ApplyIndexRequest(BaseModel):
+    index_sql: str
 
 
 @router.post("/analyze")
@@ -77,3 +82,27 @@ def analyze_query(data: AnalyzeRequest):
         "improvement_percent": benchmark["improvement_percent"],
         "confidence": confidence,
     }
+
+
+@router.post("/apply-index")
+def apply_index(data: ApplyIndexRequest):
+    index_sql = data.index_sql.strip().rstrip(";")
+    normalized = f" {index_sql.upper()} "
+
+    if not normalized.strip().startswith("CREATE INDEX"):
+        raise HTTPException(status_code=400, detail="Only CREATE INDEX statements are supported")
+
+    if any(token in normalized for token in [" DROP ", " DELETE ", " UPDATE ", " INSERT ", " ALTER "]):
+        raise HTTPException(status_code=400, detail="Unsafe index statement")
+
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(index_sql)
+            conn.commit()
+    except Exception as exc:
+        if "already exists" in str(exc).lower():
+            return {"applied": False, "message": "Index already exists"}
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    return {"applied": True, "message": "Index applied"}

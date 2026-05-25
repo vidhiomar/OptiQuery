@@ -9,7 +9,7 @@ async function fetchWithTimeout(url, options) {
     return await fetch(url, { ...options, signal: controller.signal });
   } catch (err) {
     if (err.name === "AbortError") {
-      throw new Error("Request timed out — backend may be slow or unreachable.");
+      throw new Error("Request timed out - backend may be slow or unreachable.");
     }
     throw err;
   } finally {
@@ -27,11 +27,23 @@ export async function analyzeQuery(query) {
     });
   } catch (err) {
     if (err.message.includes("timed out")) throw err;
-    throw new Error("Cannot reach the backend — make sure the server is running on port 8000.");
+    throw new Error("Cannot reach the backend - make sure the server is running on port 8000.");
   }
 
   const data = await response.json();
   if (!response.ok) throw new Error(data.detail || "Unable to analyze query");
+  return data;
+}
+
+export async function applyIndex(indexSql) {
+  const response = await fetchWithTimeout(`${API_BASE}/apply-index`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ index_sql: indexSql }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.detail || "Unable to apply index");
   return data;
 }
 

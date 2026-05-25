@@ -1,291 +1,166 @@
-# 🚀 OptiQuery
+# OptiQuery
 
-### Smarter Queries. Faster Databases.
+**Smarter Queries. Faster Databases.**
 
-OptiQuery is an AI-powered SQL optimization dashboard. It accepts SQL queries, runs them against SQLite, analyzes `EXPLAIN QUERY PLAN`, detects bottlenecks, recommends indexes, rewrites inefficient SQL with Groq AI, benchmarks before/after runtime, and displays everything in a clean developer-focused UI.
+OptiQuery is an AI-assisted SQL optimization dashboard that turns slow SQL into an explainable, measurable performance story. It analyzes SQLite execution plans, detects bottlenecks, explains them with Groq, rewrites inefficient SQL, recommends indexes, applies indexes with one click, and visualizes performance improvement in a polished React dashboard.
 
----
-
-## ✨ Features
-
-- 🖥️ Monaco code editor with SQL syntax highlighting
-- 🎯 Animated health score ring (0–100) with color-coded severity
-- 🤖 AI-powered query explanations via Groq (with local fallback)
-- ✏️ Automatic SQL rewrite removing anti-patterns
-- 📊 Before/after runtime benchmark charts
-- 🔍 Rule-based bottleneck detection with severity tags
-- 📋 Index recommendations based on query patterns
-- 🎬 Interactive demo guide with step-by-step checklist
-- ⌨️ Keyboard shortcut: `Ctrl+Enter` to analyze
-- 🗃️ SQLite demo database with 100K orders, 5K customers, 500 products
+> Positioning: OptiQuery combines deterministic database optimization rules with LLM-powered query reasoning to provide reliable, explainable optimization.
 
 ---
 
-## 🏗️ System Architecture
+## Why It Stands Out
 
-```mermaid
-flowchart TB
-    subgraph Frontend["🖥️ Frontend - React + Vite"]
-        UI["📝 Monaco SQL Editor"]
-        HC["🎯 Health Score Ring"]
-        BC["📊 Benchmark Charts"]
-        RP["📋 Result Panels"]
-    end
+Most SQL tools stop at raw `EXPLAIN` output. OptiQuery turns that into a product experience:
 
-    subgraph API["⚡ FastAPI Backend"]
-        R["🔀 /analyze Route"]
-    end
+- **Live Query Cost Visualizer**: rows scanned, estimated cost, scan heatmap, and bottleneck indicators.
+- **Optimization Timeline**: original query -> detected issues -> AI rewrite -> index recommendation -> applied index -> final benchmark.
+- **One-click Apply Index**: apply recommended `CREATE INDEX` statements directly to SQLite and rerun analysis.
+- **Query Complexity Meter**: classifies queries as `Easy`, `Moderate`, `Expensive`, or `Dangerous`.
+- **Groq AI Insights**: explains why the query is slow and generates optimized SQL.
+- **Benchmark Dashboard**: shows before/after runtime with Recharts.
+- **Monaco SQL Editor**: syntax-highlighted SQL editing with a polished developer workflow.
+- **Demo Templates**: beginner, enterprise, ORM, and analytics query mistakes for fast judging demos.
 
-    subgraph Engine["⚙️ Optimization Engine"]
-        PS["🔎 Parser Service\n(sqlglot)"]
-        ES["📖 Explain Service\n(EXPLAIN QUERY PLAN)"]
-        RE["🧩 Rule Engine\n(6 pattern rules)"]
-        AI["🤖 AI Service\n(Groq / fallback)"]
-        BS["⏱️ Benchmark Service\n(median of 3 runs)"]
-        IS["💡 Index Service\n(column analysis)"]
-        OS["📐 Optimization Service\n(health + confidence)"]
-    end
+---
 
-    subgraph DB["🗃️ SQLite Database"]
-        OT["orders\n100K rows"]
-        CT["customers\n5K rows"]
-        PT["products\n500 rows"]
-    end
+## Product Demo Flow
 
-    UI -->|"POST /analyze"| R
-    R --> PS
-    PS --> ES
-    ES --> RE
-    RE --> AI
-    AI --> BS
-    BS --> IS
-    IS --> OS
-    OS -->|"JSON response"| UI
-    ES --> DB
-    BS --> DB
+1. Open the Analyzer.
+2. Load a bad query template.
+3. Click **Analyze**.
+4. Show health score, query complexity, cost heatmap, and detected bottlenecks.
+5. Show the Groq-powered explanation and optimized SQL.
+6. Click **Apply index** on a recommended index.
+7. Watch the optimization timeline advance.
+8. Show before/after runtime and final impact.
 
-    R -.->|"health_score\nai_explanation\noptimized_query\nbenchmark"| HC
-    R -.->|"before_time\nafter_time"| BC
-    R -.->|"issues\nsuggestions\nindex_recs"| RP
+Best closing line:
 
-    style Frontend fill:#ecfdf5,stroke:#059669,stroke-width:2px,color:#1c1917
-    style API fill:#fff7ed,stroke:#ea580c,stroke-width:2px,color:#1c1917
-    style Engine fill:#f0fdfa,stroke:#0d9488,stroke-width:2px,color:#1c1917
-    style DB fill:#fffbeb,stroke:#d97706,stroke-width:2px,color:#1c1917
+> "OptiQuery does not just tell you a query is slow. It explains why, fixes it, and proves the improvement."
+
+---
+
+## Architecture
+
+```text
+React Dashboard
+  |
+  | POST /analyze
+  v
+FastAPI Backend
+  |
+  |-- SQL Parser
+  |-- Explain Service
+  |-- Rule Engine
+  |-- Groq AI Service
+  |-- Benchmark Service
+  |-- Index Recommendation Engine
+  |-- Apply Index API
+  v
+SQLite Demo Database
+```
+
+### Optimization Pipeline
+
+```text
+SQL Input
+  -> Parse query
+  -> Run EXPLAIN QUERY PLAN
+  -> Detect bottlenecks
+  -> Generate AI explanation
+  -> Rewrite SQL
+  -> Recommend indexes
+  -> Benchmark original vs optimized
+  -> Render dashboard insights
 ```
 
 ---
 
-## 🔄 Complete Analysis Workflow
+## Tech Stack
 
-```mermaid
-flowchart LR
-    A["✏️ User writes\nSQL query"] --> B["▶️ Click Analyze\nor Ctrl+Enter"]
-    B --> C{"🔎 Parse SQL\n(sqlglot)"}
-    C -->|"Invalid"| ERR["❌ Error\nshown to user"]
-    C -->|"Valid SELECT"| D["📖 Run\nEXPLAIN QUERY PLAN"]
-    D --> E["🧩 Apply 6\ndetection rules"]
-    E --> F["🤖 Generate AI\nexplanation"]
-    F --> G["✏️ Rewrite\noptimized SQL"]
-    G --> H["⏱️ Benchmark\noriginal vs optimized\n(3 runs, median)"]
-    H --> I["💡 Suggest\nindexes"]
-    I --> J["📐 Calculate\nhealth score\n+ confidence"]
-    J --> K["📊 Display\nresults"]
-
-    style A fill:#ecfdf5,stroke:#059669,stroke-width:2px,color:#1c1917
-    style B fill:#ecfdf5,stroke:#059669,stroke-width:2px,color:#1c1917
-    style C fill:#fff7ed,stroke:#ea580c,stroke-width:2px,color:#1c1917
-    style ERR fill:#fef2f2,stroke:#dc2626,stroke-width:2px,color:#1c1917
-    style D fill:#f0fdfa,stroke:#0d9488,stroke-width:2px,color:#1c1917
-    style E fill:#f0fdfa,stroke:#0d9488,stroke-width:2px,color:#1c1917
-    style F fill:#fffbeb,stroke:#d97706,stroke-width:2px,color:#1c1917
-    style G fill:#fffbeb,stroke:#d97706,stroke-width:2px,color:#1c1917
-    style H fill:#f0fdfa,stroke:#0d9488,stroke-width:2px,color:#1c1917
-    style I fill:#f0fdfa,stroke:#0d9488,stroke-width:2px,color:#1c1917
-    style J fill:#fff7ed,stroke:#ea580c,stroke-width:2px,color:#1c1917
-    style K fill:#ecfdf5,stroke:#059669,stroke-width:2px,color:#1c1917
-```
+| Layer | Tools |
+|---|---|
+| Frontend | React, Vite, React Router, Monaco Editor, Recharts, Lucide Icons |
+| Backend | FastAPI, Uvicorn, SQLite, sqlglot |
+| AI | Groq API with local fallback |
+| Database | SQLite demo dataset |
+| Visualization | Health score, benchmark charts, cost heatmap, execution timeline |
 
 ---
 
-## 🗃️ Database Schema
+## Project Structure
 
-```mermaid
-erDiagram
-    CUSTOMERS {
-        int id PK
-        text customer_name
-        text segment
-        text region
-    }
-
-    PRODUCTS {
-        int id PK
-        text product_name
-        text category
-        real price
-    }
-
-    ORDERS {
-        int id PK
-        int customer_id FK
-        int product_id FK
-        text customer_name
-        text order_date
-        real amount
-        text status
-    }
-
-    CUSTOMERS ||--o{ ORDERS : "has many"
-    PRODUCTS ||--o{ ORDERS : "referenced by"
-```
-
-**Seed Data:**
-
-| Table | Rows | Key Columns |
-|-------|------|-------------|
-| `customers` | 5,000 | `customer_name`, `segment`, `region` |
-| `products` | 500 | `product_name`, `category`, `price` |
-| `orders` | 100,000 | `customer_name`, `amount`, `order_date`, `status` |
-
----
-
-## 🧩 Rule Engine Flowchart
-
-```mermaid
-flowchart TD
-    Q["Input Query"] --> R1{"Contains\nSELECT *?"}
-    R1 -->|Yes| I1["⚠️ Avoid SELECT *\n(-20 points)"]
-    R1 -->|No| R2
-
-    R2{"Plan has\nSCAN?"}
-    R2 -->|Yes| I2["🔴 Full table scan\n(-40 points)"]
-    R2 -->|No| R3
-
-    R3{"Missing\nWHERE?"}
-    R3 -->|Yes| I3["⚠️ Missing WHERE\n(-20 points)"]
-    R3 -->|No| R4
-
-    R4{"Function on\ncolumn?"}
-    R4 -->|Yes| I4["⚠️ Function blocks index\n(-20 points)"]
-    R4 -->|No| R5
-
-    R5{"LIKE with\nleading %?"}
-    R5 -->|Yes| I5["⚠️ Leading wildcard\n(-15 points)"]
-    R5 -->|No| R6
-
-    R6{"ORDER BY\nneeds temp B-Tree?"}
-    R6 -->|Yes| I6["ℹ️ Missing sort index\n(-10 points)"]
-    R6 -->|No| PASS["✅ No issues\n100/100"]
-
-    I1 --> R2
-    I2 --> R3
-    I3 --> R4
-    I4 --> R5
-    I5 --> R6
-
-    style Q fill:#f0fdfa,stroke:#0d9488,stroke-width:2px,color:#1c1917
-    style PASS fill:#ecfdf5,stroke:#059669,stroke-width:2px,color:#1c1917
-    style I1 fill:#fffbeb,stroke:#d97706,stroke-width:2px,color:#1c1917
-    style I2 fill:#fef2f2,stroke:#dc2626,stroke-width:2px,color:#1c1917
-    style I3 fill:#fffbeb,stroke:#d97706,stroke-width:2px,color:#1c1917
-    style I4 fill:#fffbeb,stroke:#d97706,stroke-width:2px,color:#1c1917
-    style I5 fill:#fffbeb,stroke:#d97706,stroke-width:2px,color:#1c1917
-    style I6 fill:#f0fdfa,stroke:#0d9488,stroke-width:2px,color:#1c1917
-```
-
----
-
-## 🛠️ Tech Stack
-
-```mermaid
-graph LR
-    subgraph Frontend
-        React["⚛️ React 18"]
-        Vite["⚡ Vite"]
-        Monaco["📝 Monaco Editor"]
-        Recharts["📊 Recharts"]
-        Lucide["🎨 Lucide Icons"]
-    end
-
-    subgraph Backend
-        FastAPI["🚀 FastAPI"]
-        Uvicorn["🦄 Uvicorn"]
-        SQLite["🗃️ SQLite"]
-        sqlglot["🔎 sqlglot"]
-    end
-
-    subgraph AI
-        Groq["🤖 Groq API"]
-        Llama["🦙 Llama 3.1"]
-    end
-
-    React --> Vite
-    FastAPI --> Uvicorn
-    Groq --> Llama
-    React -->|"HTTP"| FastAPI
-    FastAPI --> SQLite
-    FastAPI --> Groq
-
-    style Frontend fill:#ecfdf5,stroke:#059669,stroke-width:2px,color:#1c1917
-    style Backend fill:#fff7ed,stroke:#ea580c,stroke-width:2px,color:#1c1917
-    style AI fill:#fffbeb,stroke:#d97706,stroke-width:2px,color:#1c1917
-```
-
----
-
-## 📁 Project Structure
-
-```
+```text
 backend/
   app/
     api/
-      routes.py              # POST /analyze endpoint
+      routes.py
     db/
-      database.db            # SQLite demo database
-      db_connection.py       # Connection manager with WAL mode
-      seed_db.py             # Generates demo data
+      database.db
+      db_connection.py
+      seed_db.py
     rules/
-      query_rules.py         # Pattern-based issue detection
+      query_rules.py
     services/
-      ai_service.py          # Groq AI + fallback logic
-      benchmark_service.py   # Multi-run median benchmarking
-      explain_service.py     # EXPLAIN QUERY PLAN parsing
-      index_service.py       # Index recommendation engine
-      optimization_service.py  # Health score + confidence
-      parser_service.py      # SQL validation via sqlglot
-    main.py                  # FastAPI app + CORS
+      ai_service.py
+      benchmark_service.py
+      explain_service.py
+      index_service.py
+      optimization_service.py
+      parser_service.py
+    main.py
   requirements.txt
 
 frontend/
   src/
-    components/              # 7 reusable UI components
-    data/                    # Demo query templates
-    hooks/                   # State management
-    layout/                  # App shell (nav + footer)
-    pages/                   # 3 page routes
-    services/                # API client
-    App.jsx                  # Router config
-    main.jsx                 # Entry point
-    styles.css               # Design system
-  index.html
-  package.json
+    components/
+      BenchmarkChart.jsx
+      ComplexityMeter.jsx
+      CostVisualizer.jsx
+      ExplainPlan.jsx
+      HealthScore.jsx
+      LoadingOverlay.jsx
+      MetricsCard.jsx
+      OptimizationTimeline.jsx
+      ResultPanel.jsx
+      SqlEditor.jsx
+    data/
+      demoQueries.js
+    hooks/
+      useQueryAnalysis.js
+    layout/
+      AppLayout.jsx
+    pages/
+      AnalyzerPage.jsx
+      DemoGuidePage.jsx
+      HomePage.jsx
+    services/
+      api.js
+    App.jsx
+    main.jsx
+    styles.css
 ```
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
-### Backend
+### 1. Backend
 
 ```bash
 cd backend
 pip install -r requirements.txt
 python app/db/seed_db.py
-uvicorn app.main:app --host 127.0.0.1 --port 8000
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-### Frontend
+Backend runs at:
+
+```text
+http://127.0.0.1:8000
+```
+
+### 2. Frontend
 
 ```bash
 cd frontend
@@ -293,34 +168,45 @@ npm install
 npm run dev
 ```
 
-Open **http://localhost:5173**
+Frontend runs at:
 
-### Groq AI (Optional)
+```text
+http://127.0.0.1:5173
+```
 
-Without an API key, OptiQuery uses local fallback. The demo works fully offline.
+If Vite picks another port, the backend CORS config supports local dev ports.
+
+---
+
+## Groq Setup
+
+Groq is optional. Without a key, OptiQuery uses local fallback explanations and rewrites so the demo still works.
+
+PowerShell:
 
 ```powershell
-# PowerShell
-$env:GROQ_API_KEY="your_key_here"
+$env:GROQ_API_KEY="your_groq_api_key_here"
 $env:GROQ_MODEL="llama-3.1-8b-instant"
 ```
 
+Command Prompt:
+
 ```bat
-:: CMD
-set GROQ_API_KEY=your_key_here
+set GROQ_API_KEY=your_groq_api_key_here
 set GROQ_MODEL=llama-3.1-8b-instant
 ```
 
 ---
 
-## 📡 API Reference
+## API Reference
 
 | Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/health` | Health check |
+|---|---|---|
+| `GET` | `/health` | Backend health check |
 | `POST` | `/analyze` | Analyze a SQL query |
+| `POST` | `/apply-index` | Apply a recommended SQLite index |
 
-**Request:**
+### Analyze Request
 
 ```json
 {
@@ -328,100 +214,127 @@ set GROQ_MODEL=llama-3.1-8b-instant
 }
 ```
 
-**Response fields:**
+### Analyze Response
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `health_score` | `int` | Query quality (0–100) |
-| `ai_explanation` | `string` | Plain-language analysis |
-| `optimized_query` | `string` | Rewritten SQL |
-| `issues` | `string[]` | Detected anti-patterns |
-| `suggestions` | `string[]` | Optimization tips |
-| `index_recommendations` | `string[]` | CREATE INDEX DDL |
-| `before_time` | `float` | Original runtime (s) |
-| `after_time` | `float` | Optimized runtime (s) |
-| `improvement_percent` | `float` | Speed improvement % |
-| `confidence` | `int` | Confidence (0–95) |
-| `plan` | `object[]` | EXPLAIN QUERY PLAN |
-| `columns` | `string[]` | Column names |
-| `rows` | `object[]` | Preview rows (max 100) |
+```json
+{
+  "health_score": 20,
+  "confidence": 55,
+  "ai_explanation": "SQLite is scanning the orders table...",
+  "optimized_query": "SELECT id, customer_name, order_date, amount FROM orders WHERE customer_name = 'John';",
+  "issues": ["Avoid using SELECT *", "Full table scan detected"],
+  "suggestions": ["Select only required columns"],
+  "index_recommendations": ["CREATE INDEX idx_orders_customer_name ON orders(customer_name);"],
+  "before_time": 0.09,
+  "after_time": 0.03,
+  "improvement_percent": 66.7,
+  "plan": []
+}
+```
 
----
+### Apply Index Request
 
-## 🧪 Demo Queries
-
-| # | Query | Anti-Pattern |
-|---|-------|-------------|
-| 1 | `SELECT * FROM orders WHERE LOWER(customer_name) = 'john'` | Function blocks index |
-| 2 | `SELECT * FROM orders` | Full table scan |
-| 3 | `SELECT * FROM orders ORDER BY amount` | Sort without index |
-| 4 | `SELECT * FROM orders WHERE customer_name LIKE '%john%'` | Leading wildcard |
-| 5 | `SELECT o.*, c.segment FROM orders o JOIN customers c ...` | Unfiltered join |
-
----
-
-## 🎯 Optimization Rules
-
-| Rule | Severity | Score Impact |
-|------|----------|-------------|
-| `SELECT *` usage | ⚠️ Warning | -20 |
-| Full table scan | 🔴 Critical | -40 |
-| Missing `WHERE` clause | ⚠️ Warning | -20 |
-| Function on column (`LOWER()`, etc.) | ⚠️ Warning | -20 |
-| Leading wildcard `LIKE '%...'` | ⚠️ Warning | -15 |
-| `ORDER BY` without index | ℹ️ Info | -10 |
-
----
-
-## 🎬 Demo Flow
-
-```mermaid
-flowchart LR
-    A["1️⃣ Open\nAnalyzer"] --> B["2️⃣ Load\nTemplate"]
-    B --> C["3️⃣ Click\nAnalyze"]
-    C --> D["4️⃣ Show\nHealth Score"]
-    D --> E["5️⃣ Walk through\nAI Explanation"]
-    E --> F["6️⃣ Apply\nOptimized SQL"]
-    F --> G["7️⃣ Show\nBenchmarks"]
-    G --> H["8️⃣ Close with\nMeasurable Results"]
-
-    style A fill:#ecfdf5,stroke:#059669,stroke-width:2px,color:#1c1917
-    style B fill:#ecfdf5,stroke:#059669,stroke-width:2px,color:#1c1917
-    style C fill:#fff7ed,stroke:#ea580c,stroke-width:2px,color:#1c1917
-    style D fill:#f0fdfa,stroke:#0d9488,stroke-width:2px,color:#1c1917
-    style E fill:#fffbeb,stroke:#d97706,stroke-width:2px,color:#1c1917
-    style F fill:#fff7ed,stroke:#ea580c,stroke-width:2px,color:#1c1917
-    style G fill:#f0fdfa,stroke:#0d9488,stroke-width:2px,color:#1c1917
-    style H fill:#ecfdf5,stroke:#059669,stroke-width:2px,color:#1c1917
+```json
+{
+  "index_sql": "CREATE INDEX idx_orders_customer_name ON orders(customer_name);"
+}
 ```
 
 ---
 
-## 💡 Why OptiQuery?
+## Demo Query Templates
 
-Most SQL tools show raw `EXPLAIN` output. OptiQuery goes further:
-
-| Feature | Basic Tools | OptiQuery |
-|---------|-------------|-----------|
-| Show execution plan | ✅ | ✅ |
-| Plain-English explanation | ❌ | ✅ AI-powered |
-| Auto SQL rewrite | ❌ | ✅ |
-| Index recommendations | ❌ | ✅ Ready-to-run DDL |
-| Before/after benchmarks | ❌ | ✅ Median of 3 runs |
-| Health scoring | ❌ | ✅ 0–100 score |
+| Category | Query | What It Shows |
+|---|---|---|
+| Beginner mistake | `SELECT * FROM orders;` | Full table scan and missing filter |
+| Beginner mistake | `LOWER(customer_name) = 'john'` | Function blocks index-friendly filtering |
+| Analytics query | `ORDER BY amount` | Sort pressure and index opportunity |
+| Enterprise mistake | `LIKE '%john%'` | Leading wildcard defeats indexes |
+| ORM mistake | Unfiltered join | Broad joined result set |
 
 ---
 
-## 🔮 Future Work
+## Optimization Signals
 
+OptiQuery detects and visualizes:
+
+- `SELECT *`
+- Full table scans
+- Missing `WHERE` clauses
+- Functions applied to columns
+- Leading wildcard searches
+- Sort bottlenecks
+- Join complexity
+- Index opportunities
+
+These signals feed:
+
+- health score
+- confidence score
+- complexity meter
+- query cost visualizer
+- AI explanation
+- SQL rewrite
+- index recommendations
+- before/after benchmark
+
+---
+
+## Demo Dataset
+
+| Table | Rows | Purpose |
+|---|---:|---|
+| `orders` | 100,000 | Main table for scan, sort, and filter demos |
+| `customers` | 5,000 | Join and customer segmentation demos |
+| `products` | 500 | Product lookup and future analytics demos |
+
+---
+
+## Judge FAQ
+
+### Why SQLite?
+
+SQLite keeps the demo lightweight, reliable, and easy to run during a hackathon. The architecture is modular enough to extend to PostgreSQL or MySQL later.
+
+### Where is the AI used?
+
+Groq is used for natural-language query reasoning and SQL rewrite generation. Deterministic database rules handle safety-critical detection so the system remains reliable and explainable.
+
+### What makes OptiQuery different?
+
+Most tools show raw query plans. OptiQuery explains the plan, rewrites the SQL, recommends indexes, applies indexes, and proves the improvement visually.
+
+### Why is this useful?
+
+Slow SQL is hard to debug and often requires database expertise. OptiQuery gives developers an immediate optimization workflow inside a friendly dashboard.
+
+---
+
+## Future Direction
+
+OptiQuery can grow into enterprise developer tooling:
+
+- VS Code extension
+- GitHub PR SQL reviewer
+- CI/CD optimization checks
+- ORM query analyzer
 - PostgreSQL and MySQL support
-- CI/CD query check integration
-- Query history persistence
-- Cost-based optimization analysis
-- Live database monitoring
+- Query history and team collaboration
+- Live production monitoring
+- Explain-plan visual diffs
 
 ---
 
-## 📄 License
+## Pitch Summary
+
+**Problem:** Slow SQL hurts application performance, but debugging execution plans requires deep expertise.
+
+**Solution:** OptiQuery uses deterministic optimization rules plus Groq-powered reasoning to explain, rewrite, benchmark, and improve SQL queries.
+
+**Impact:** Developers get faster queries, clearer bottleneck explanations, and measurable performance improvement in one workflow.
+
+---
+
+## License
 
 See [LICENSE](LICENSE).

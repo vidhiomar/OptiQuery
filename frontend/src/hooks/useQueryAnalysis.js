@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-import { analyzeQuery } from "../services/api.js";
+import { analyzeQuery, applyIndex as applyIndexRequest } from "../services/api.js";
 import { demoQueries } from "../data/demoQueries.js";
 
 export function useQueryAnalysis() {
@@ -9,6 +9,7 @@ export function useQueryAnalysis() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [analyzedQuery, setAnalyzedQuery] = useState("");
+  const [appliedIndexes, setAppliedIndexes] = useState([]);
 
   function normalize(value) {
     return value.trim().replace(/\s+/g, " ").replace(/;$/, "").toLowerCase();
@@ -22,9 +23,9 @@ export function useQueryAnalysis() {
   const canOptimize = Boolean(result?.optimized_query && isCurrentQueryAnalyzed && !isCurrentQueryOptimized);
 
   const analyze = useCallback(
-    async (nextQuery = query) => {
+    async (nextQuery = query, options = {}) => {
       const norm = normalize(nextQuery);
-      if (norm && norm === normalizedAnalyzedQuery && result) return result;
+      if (!options.force && norm && norm === normalizedAnalyzedQuery && result) return result;
 
       setLoading(true);
       setError("");
@@ -60,8 +61,27 @@ export function useQueryAnalysis() {
     if (canOptimize) setQuery(result.optimized_query);
   }
 
+  async function applyIndex(indexSql) {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await applyIndexRequest(indexSql);
+      setAppliedIndexes((current) => Array.from(new Set([...current, indexSql])));
+      await analyze(query, { force: true });
+      return response;
+    } catch (err) {
+      setError(err.message);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return {
     analyze,
+    appliedIndexes,
+    applyIndex,
     canOptimize,
     error,
     isCurrentQueryAnalyzed,

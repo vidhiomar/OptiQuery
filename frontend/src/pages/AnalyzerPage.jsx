@@ -2,10 +2,13 @@ import React, { useEffect, useCallback } from "react";
 import { Play, Wand2 } from "lucide-react";
 
 import BenchmarkChart from "../components/BenchmarkChart.jsx";
+import ComplexityMeter from "../components/ComplexityMeter.jsx";
+import CostVisualizer from "../components/CostVisualizer.jsx";
 import ExplainPlan from "../components/ExplainPlan.jsx";
 import HealthScore from "../components/HealthScore.jsx";
 import LoadingOverlay from "../components/LoadingOverlay.jsx";
 import MetricsCard from "../components/MetricsCard.jsx";
+import OptimizationTimeline from "../components/OptimizationTimeline.jsx";
 import ResultPanel from "../components/ResultPanel.jsx";
 import SqlEditor from "../components/SqlEditor.jsx";
 import { demoQueries } from "../data/demoQueries.js";
@@ -13,7 +16,7 @@ import { useQueryAnalysis } from "../hooks/useQueryAnalysis.js";
 
 export default function AnalyzerPage() {
   const {
-    analyze, canOptimize, error, isCurrentQueryAnalyzed,
+    analyze, appliedIndexes, applyIndex, canOptimize, error, isCurrentQueryAnalyzed,
     isCurrentQueryOptimized, loading, optimizeCurrentResult,
     query, result, runDemo, setQuery, useOptimizedQuery,
   } = useQueryAnalysis();
@@ -95,8 +98,16 @@ export default function AnalyzerPage() {
         <div className="result-pane">
           <HealthScore score={result?.health_score} />
           <MetricsCard result={result} />
+          <ComplexityMeter result={result} />
+          <CostVisualizer result={result} />
+          <OptimizationTimeline appliedIndexes={appliedIndexes} result={result} />
           <BenchmarkChart result={result} />
-          <ResultPanel result={result} onUseOptimizedQuery={useOptimizedQuery} />
+          <ResultPanel
+            appliedIndexes={appliedIndexes}
+            onApplyIndex={applyIndex}
+            onUseOptimizedQuery={useOptimizedQuery}
+            result={result}
+          />
           <ExplainPlan plan={result?.plan || []} />
         </div>
       </section>

@@ -8,7 +8,9 @@ function getSeverity(item, title) {
   return "Recommended";
 }
 
-function ListBlock({ title, items, emptyText }) {
+function ListBlock({ appliedIndexes = [], onApplyIndex, title, items, emptyText }) {
+  const isIndexBlock = title === "Index Recommendations";
+
   return (
     <section className="result-block">
       <div className="block-heading">
@@ -19,10 +21,22 @@ function ListBlock({ title, items, emptyText }) {
         <ul className="tag-list">
           {items.map((item) => (
             <li key={item}>
-              <span className={`severity-tag severity-${getSeverity(item, title).toLowerCase()}`}>
-                {getSeverity(item, title)}
-              </span>
-              {item}
+              <div>
+                <span className={`severity-tag severity-${getSeverity(item, title).toLowerCase()}`}>
+                  {getSeverity(item, title)}
+                </span>
+                <span>{item}</span>
+              </div>
+              {isIndexBlock && (
+                <button
+                  className={appliedIndexes.includes(item) ? "state-button small" : "secondary-button small"}
+                  disabled={appliedIndexes.includes(item)}
+                  onClick={() => onApplyIndex?.(item)}
+                  type="button"
+                >
+                  {appliedIndexes.includes(item) ? "Applied" : "Apply index"}
+                </button>
+              )}
             </li>
           ))}
         </ul>
@@ -114,7 +128,7 @@ function PreviewTable({ result }) {
   );
 }
 
-export default function ResultPanel({ result, onUseOptimizedQuery }) {
+export default function ResultPanel({ appliedIndexes = [], onApplyIndex, result, onUseOptimizedQuery }) {
   return (
     <div className="panel-stack">
       <AiExplanation result={result} />
@@ -125,6 +139,8 @@ export default function ResultPanel({ result, onUseOptimizedQuery }) {
       <ListBlock title="Suggestions" items={result?.suggestions || []}
         emptyText={result ? "No suggestions." : "Run an analysis."} />
       <ListBlock title="Index Recommendations" items={result?.index_recommendations || []}
+        appliedIndexes={appliedIndexes}
+        onApplyIndex={onApplyIndex}
         emptyText={result ? "No indexes needed." : "Run an analysis."} />
       <section className="result-block">
         <div className="block-heading">
