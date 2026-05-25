@@ -42,7 +42,18 @@ pnpm-debug.log*
 Thumbs.db
 .idea/
 .vscode/
+*.swp
+*.swo
+*~
 
 # Logs
 *.log
 logs/
+
+# Build artifacts
+*.egg-info/
+build/
+*.spec
+
+# Gemini / AI tools
+.gemini/
