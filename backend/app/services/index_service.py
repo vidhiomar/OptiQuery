@@ -14,4 +14,10 @@ def suggest_indexes(query):
     if "order_date" in query_lower:
         suggestions.append("CREATE INDEX idx_orders_order_date ON orders(order_date);")
 
+    if "customer_id" in query_lower:
+        suggestions.append("CREATE INDEX idx_orders_customer_id ON orders(customer_id);")
+
+    if "product_id" in query_lower:
+        suggestions.append("CREATE INDEX idx_orders_product_id ON orders(product_id);")
+
     return suggestions

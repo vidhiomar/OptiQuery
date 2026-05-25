@@ -5,6 +5,10 @@ FUNCTION_ON_COLUMN_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+LEADING_WILDCARD_PATTERN = re.compile(
+    r"LIKE\s+['\"]%", re.IGNORECASE
+)
+
 
 def analyze_rules(query, plan):
     query_upper = query.upper()
@@ -23,5 +27,11 @@ def analyze_rules(query, plan):
 
     if FUNCTION_ON_COLUMN_PATTERN.search(query):
         issues.append("Function on column detected")
+
+    if LEADING_WILDCARD_PATTERN.search(query):
+        issues.append("Leading wildcard in LIKE defeats indexes")
+
+    if "ORDER BY" in query_upper and "USE TEMP B-TREE" in plan_text:
+        issues.append("ORDER BY requires temp B-Tree (missing index)")
 
     return issues

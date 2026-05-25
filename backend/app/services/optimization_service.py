@@ -21,6 +21,9 @@ def suggest_optimizations(query, plan, issues):
     if "USE TEMP B-TREE" in plan_text:
         suggestions.append("Add an index that matches the ORDER BY or GROUP BY columns.")
 
+    if "Leading wildcard" in " ".join(issues):
+        suggestions.append("Avoid LIKE '%...' patterns; use full-text search or prefix matching instead.")
+
     return suggestions
 
 
@@ -31,15 +34,13 @@ def calculate_health_score(query, plan, issues):
         "Full table scan detected": 40,
         "Missing WHERE clause": 20,
         "Function on column detected": 20,
+        "Leading wildcard in LIKE defeats indexes": 15,
+        "ORDER BY requires temp B-Tree (missing index)": 10,
     }
 
     for issue, penalty in deductions.items():
         if issue in issues:
             score -= penalty
-
-    plan_text = " ".join(item["detail"] for item in plan).upper()
-    if "USE TEMP B-TREE" in plan_text:
-        score -= 10
 
     return max(score, 0)
 
@@ -62,5 +63,8 @@ def calculate_confidence(query, plan, issues):
 
     if "USE TEMP B-TREE" in plan_text:
         score -= 7
+
+    if "Leading wildcard" in " ".join(issues):
+        score -= 5
 
     return max(score, 0)

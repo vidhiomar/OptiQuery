@@ -22,7 +22,7 @@ def _fallback_explanation(query, plan, issues, index_recommendations):
         details.append("There is no WHERE clause, so SQLite must inspect and return a broad result set.")
 
     if not details:
-        details.append("The query plan does not show a major bottleneck covered by the Sprint 2 rules.")
+        details.append("The query plan does not show a major bottleneck covered by the current rules.")
 
     recommendations = [
         "Select only the columns needed by the frontend.",
@@ -36,18 +36,19 @@ def _fallback_explanation(query, plan, issues, index_recommendations):
 
 
 def generate_ai_response(prompt):
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
         return None
 
     try:
-        from openai import OpenAI
+        from groq import Groq
 
-        client = OpenAI(api_key=api_key)
+        client = Groq(api_key=api_key)
         response = client.chat.completions.create(
-            model=os.getenv("OPENAI_MODEL", "gpt-4.1-mini"),
+            model=os.getenv("GROQ_MODEL", "llama-3.1-8b-instant"),
             messages=[{"role": "user", "content": prompt}],
             temperature=0.2,
+            max_tokens=700,
         )
         return response.choices[0].message.content.strip()
     except Exception:

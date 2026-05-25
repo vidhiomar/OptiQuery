@@ -2,19 +2,22 @@ import time
 
 from app.db.db_connection import get_connection
 
+BENCHMARK_RUNS = 3
+
 
 def benchmark_query(query):
-    conn = get_connection()
-    cursor = conn.cursor()
+    times = []
+    for _ in range(BENCHMARK_RUNS):
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            start = time.perf_counter()
+            cursor.execute(query)
+            cursor.fetchall()
+            end = time.perf_counter()
+        times.append(end - start)
 
-    start = time.perf_counter()
-    cursor.execute(query)
-    cursor.fetchall()
-    end = time.perf_counter()
-
-    conn.close()
-
-    return round(end - start, 6)
+    times.sort()
+    return round(times[len(times) // 2], 6)  # median
 
 
 def compare_queries(original_query, optimized_query):
